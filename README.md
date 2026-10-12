@@ -22,7 +22,7 @@ Recomendado em uma instalação funcional do Arch Linux.
 ```bash
 sudo pacman -S git
 
-git clone https://github.com/SEU_USUARIO/kauan-dotfiles.git ~/kauan-dotfiles
+git clone https://github.com/kauanabreu064/kauan-dotfiles.git ~/kauan-dotfiles
 
 cd ~/kauan-dotfiles
 
