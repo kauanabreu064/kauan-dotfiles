@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Perfil Faculdade
+Comment=Economia de bateria para aulas
+Exec=/home/kauan/.local/bin/perfil faculdade
+Icon=applications-education
+Terminal=false
+Type=Application
+Categories=System;

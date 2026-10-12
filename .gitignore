@@ -1,0 +1,34 @@
+# Segredos
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.token
+
+# Cloudflare
+
+# Firefox
+**/cookies.sqlite
+**/logins.json
+**/key4.db
+**/places.sqlite
+**/sessionstore*
+
+# Fish
+fish_variables
+
+# Cache / logs
+.cache/
+cache/
+logs/
+*.log
+
+# Temporários
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Sistema
+.DS_Store

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Perfil Normal
+Comment=Uso normal do sistema
+Exec=/home/kauan/.local/bin/perfil normal
+Icon=computer
+Terminal=false
+Type=Application
+Categories=System;

@@ -1,0 +1,21 @@
+:root {
+	--focus-outline-color: var(--color-accent-primary) !important;
+	--link-color: var(--color-accent-primary) !important;
+	--link-color-hover: var(--color-accent-primary-hover) !important;
+	--link-color-active: var(--color-accent-primary-active) !important;
+
+	&[lwtheme="true"] {
+		--color-accent-primary: var(
+			--urlbarview-background-color-selected
+		) !important;
+	}
+}
+
+.urlbarView-row[selected] {
+	background-color: var(--color-accent-primary) !important;
+
+	&,
+	:is(.urlbarView-title, .urlbarView-url, .urlbarView-action) {
+		color: var(--color-accent-primary-contrast, #ffffff) !important;
+	}
+}

@@ -1,0 +1,766 @@
+#!/usr/bin/env bash
+
+set -u
+
+THEME="$HOME/.config/rofi/kauan-control.rasi"
+PROFILE_CACHE="$HOME/.cache/kauan-profile"
+
+
+# ============================================================
+# TOGGLE
+# ============================================================
+
+if pgrep -x rofi >/dev/null 2>&1; then
+    pkill -x rofi
+    exit 0
+fi
+
+
+# ============================================================
+# BASE
+# ============================================================
+
+menu() {
+    rofi \
+        -dmenu \
+        -i \
+        -theme "$THEME" \
+        -p "$1"
+}
+
+
+notify() {
+    notify-send "$1" "$2" 2>/dev/null || true
+}
+
+
+current_profile() {
+    if [ -f "$PROFILE_CACHE" ]; then
+        cat "$PROFILE_CACHE"
+    else
+        echo "normal"
+    fi
+}
+
+
+# ============================================================
+# STATUS
+# ============================================================
+
+wifi_status() {
+    if [ "$(nmcli radio wifi 2>/dev/null)" = "enabled" ]; then
+        echo "Ligado"
+    else
+        echo "Desligado"
+    fi
+}
+
+
+bluetooth_status() {
+    local state
+
+    state="$(
+        bluetoothctl show 2>/dev/null |
+        awk '/Powered:/ {print $2; exit}'
+    )"
+
+    if [ "$state" = "yes" ]; then
+        echo "Ligado"
+    else
+        echo "Desligado"
+    fi
+}
+
+
+volume_status() {
+    local output
+
+    output="$(
+        wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null
+    )"
+
+    if [ -z "$output" ]; then
+        echo "?"
+        return
+    fi
+
+    if echo "$output" | grep -q "MUTED"; then
+        echo "Mudo"
+        return
+    fi
+
+    echo "$output" |
+        awk '{
+            printf "%.0f%%", $2 * 100
+        }'
+}
+
+
+brightness_status() {
+    if command -v brightnessctl >/dev/null 2>&1; then
+        brightnessctl -m 2>/dev/null |
+            awk -F, '{print $4}'
+    else
+        echo "?"
+    fi
+}
+
+
+battery_status() {
+    local bat
+    local capacity
+    local status
+
+    bat="$(
+        find /sys/class/power_supply \
+            -maxdepth 1 \
+            -name 'BAT*' \
+            2>/dev/null |
+        head -n1
+    )"
+
+    if [ -z "$bat" ]; then
+        echo "N/A"
+        return
+    fi
+
+    capacity="$(
+        cat "$bat/capacity" 2>/dev/null ||
+        echo "?"
+    )"
+
+    status="$(
+        cat "$bat/status" 2>/dev/null ||
+        echo ""
+    )"
+
+    case "$status" in
+
+        Charging)
+            echo "${capacity}% carregando"
+            ;;
+
+        *)
+            echo "${capacity}%"
+            ;;
+
+    esac
+}
+
+
+temperature_status() {
+    local temp
+    local value
+
+    if command -v sensors >/dev/null 2>&1; then
+
+        temp="$(
+            sensors 2>/dev/null |
+            grep -E 'Package id 0:|Tctl:|CPU:' |
+            head -n1 |
+            grep -oE '\+[0-9]+(\.[0-9]+)?°C' |
+            head -n1 |
+            tr -d '+'
+        )"
+
+        if [ -n "$temp" ]; then
+            echo "$temp"
+            return
+        fi
+    fi
+
+
+    for zone in /sys/class/thermal/thermal_zone*/temp; do
+
+        [ -f "$zone" ] || continue
+
+        value="$(cat "$zone" 2>/dev/null)"
+
+        if [ -n "$value" ] &&
+           [ "$value" -gt 1000 ] 2>/dev/null; then
+
+            awk \
+                -v value="$value" \
+                'BEGIN {
+                    printf "%.1f°C\n", value / 1000
+                }'
+
+            return
+        fi
+
+    done
+
+    echo "?"
+}
+
+
+# ============================================================
+# WIFI
+# ============================================================
+
+wifi_menu() {
+    local current
+    local choice
+    local password
+
+    current="$(
+        nmcli -t -f ACTIVE,SSID dev wifi 2>/dev/null |
+        awk -F: '$1 == "yes" {
+            $1=""
+            sub(/^:/, "")
+            print
+            exit
+        }'
+    )"
+
+    nmcli dev wifi rescan >/dev/null 2>&1 || true
+
+
+    choice="$(
+        {
+            echo "󰤭  Desligar Wi-Fi"
+            echo "󰑓  Atualizar redes"
+
+            nmcli -t -f SSID dev wifi list 2>/dev/null |
+                sed '/^$/d' |
+                sort -u |
+                while read -r ssid; do
+
+                    if [ "$ssid" = "$current" ]; then
+                        echo "󰤨  $ssid  [conectado]"
+                    else
+                        echo "󰤨  $ssid"
+                    fi
+
+                done
+
+        } | menu "Wi-Fi"
+    )" || return
+
+
+    [ -z "$choice" ] && return
+
+
+    case "$choice" in
+
+        *"Desligar Wi-Fi"*)
+
+            nmcli radio wifi off
+            return
+            ;;
+
+
+        *"Atualizar redes"*)
+
+            nmcli dev wifi rescan \
+                >/dev/null 2>&1 || true
+
+            sleep 1
+
+            wifi_menu
+            return
+            ;;
+
+    esac
+
+
+    choice="$(
+        echo "$choice" |
+        sed 's/^󰤨  //' |
+        sed 's/  \[conectado\]$//'
+    )"
+
+
+    [ "$choice" = "$current" ] && return
+
+
+    if nmcli dev wifi connect "$choice" \
+        >/dev/null 2>&1; then
+
+        notify \
+            "Wi-Fi" \
+            "Conectado a $choice"
+
+        return
+    fi
+
+
+    password="$(
+        rofi \
+            -dmenu \
+            -password \
+            -theme "$THEME" \
+            -p "Senha"
+    )" || return
+
+
+    [ -z "$password" ] && return
+
+
+    if nmcli dev wifi connect \
+        "$choice" \
+        password "$password" \
+        >/dev/null 2>&1; then
+
+        notify \
+            "Wi-Fi" \
+            "Conectado a $choice"
+
+    else
+
+        notify \
+            "Wi-Fi" \
+            "Falha ao conectar em $choice"
+
+    fi
+}
+
+
+# ============================================================
+# BLUETOOTH
+# ============================================================
+
+bluetooth_devices() {
+    bluetoothctl devices 2>/dev/null |
+    while read -r _ mac name; do
+
+        [ -z "${mac:-}" ] && continue
+
+
+        if bluetoothctl info "$mac" 2>/dev/null |
+            grep -q "Connected: yes"; then
+
+            echo "󰂱  $name  [conectado]  $mac"
+
+        else
+
+            echo "󰂯  $name  $mac"
+
+        fi
+
+    done
+}
+
+
+bluetooth_scan() {
+    notify \
+        "Bluetooth" \
+        "Procurando dispositivos..."
+
+    timeout 7 bluetoothctl scan on \
+        >/dev/null 2>&1 || true
+}
+
+
+bluetooth_menu() {
+    local choice
+    local mac
+    local name
+
+
+    choice="$(
+        {
+            echo "󰂲  Desligar Bluetooth"
+            echo "󰑓  Procurar dispositivos"
+
+            bluetooth_devices
+
+        } | menu "Bluetooth"
+    )" || return
+
+
+    [ -z "$choice" ] && return
+
+
+    case "$choice" in
+
+        *"Desligar Bluetooth"*)
+
+            bluetoothctl power off \
+                >/dev/null 2>&1
+
+            return
+            ;;
+
+
+        *"Procurar dispositivos"*)
+
+            bluetooth_scan
+            bluetooth_menu
+
+            return
+            ;;
+
+    esac
+
+
+    mac="$(
+        echo "$choice" |
+        grep -oE \
+            '([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}' |
+        tail -n1
+    )"
+
+
+    [ -z "$mac" ] && return
+
+
+    name="$(
+        bluetoothctl info "$mac" 2>/dev/null |
+        sed -n 's/^[[:space:]]*Name: //p' |
+        head -n1
+    )"
+
+
+    if bluetoothctl info "$mac" 2>/dev/null |
+        grep -q "Connected: yes"; then
+
+        bluetoothctl disconnect "$mac" \
+            >/dev/null 2>&1
+
+        notify \
+            "Bluetooth" \
+            "$name desconectado"
+
+        return
+    fi
+
+
+    if ! bluetoothctl info "$mac" 2>/dev/null |
+        grep -q "Paired: yes"; then
+
+        bluetoothctl pair "$mac" \
+            >/dev/null 2>&1 || true
+
+        sleep 1
+
+        bluetoothctl trust "$mac" \
+            >/dev/null 2>&1 || true
+
+    fi
+
+
+    if bluetoothctl connect "$mac" \
+        >/dev/null 2>&1; then
+
+        notify \
+            "Bluetooth" \
+            "$name conectado"
+
+    else
+
+        notify \
+            "Bluetooth" \
+            "Não foi possível conectar $name"
+
+    fi
+}
+
+
+# ============================================================
+# ÁUDIO
+# ============================================================
+
+audio_menu() {
+    local choice
+
+
+    choice="$(
+        printf '%s\n' \
+            "󰝟  Mutar / Desmutar" \
+            "󰝝  Volume +5%" \
+            "󰝞  Volume -5%" \
+            "󰕾  Mixer de áudio" |
+        menu "Áudio"
+    )" || return
+
+
+    case "$choice" in
+
+        *"Mutar"*)
+
+            wpctl set-mute \
+                @DEFAULT_AUDIO_SINK@ \
+                toggle
+            ;;
+
+
+        *"+5%"*)
+
+            wpctl set-volume \
+                -l 1.0 \
+                @DEFAULT_AUDIO_SINK@ \
+                5%+
+            ;;
+
+
+        *"-5%"*)
+
+            wpctl set-volume \
+                @DEFAULT_AUDIO_SINK@ \
+                5%-
+            ;;
+
+
+        *"Mixer"*)
+
+            pavucontrol \
+                >/dev/null 2>&1 &
+            ;;
+
+    esac
+}
+
+
+# ============================================================
+# BRILHO
+# ============================================================
+
+brightness_menu() {
+    local choice
+
+
+    choice="$(
+        printf '%s\n' \
+            "󰃠  +10%" \
+            "󰃞  -10%" \
+            "󰃟  25%" \
+            "󰃟  50%" \
+            "󰃟  75%" \
+            "󰃠  100%" |
+        menu "Brilho"
+    )" || return
+
+
+    case "$choice" in
+
+        *"+10%"*)
+            brightnessctl set +10%
+            ;;
+
+        *"-10%"*)
+            brightnessctl set 10%-
+            ;;
+
+        *"25%"*)
+            brightnessctl set 25%
+            ;;
+
+        *"50%"*)
+            brightnessctl set 50%
+            ;;
+
+        *"75%"*)
+            brightnessctl set 75%
+            ;;
+
+        *"100%"*)
+            brightnessctl set 100%
+            ;;
+
+    esac
+}
+
+
+# ============================================================
+# PERFIS
+# ============================================================
+
+profile_menu() {
+    local choice
+
+
+    choice="$(
+        printf '%s\n' \
+            "󰍹  Normal" \
+            "󰅩  Programação" \
+            "󰊴  Gaming" \
+            "󰑴  Faculdade" \
+            "󰈙  Focus" |
+        menu "Perfil"
+    )" || return
+
+
+    case "$choice" in
+
+        *"Normal"*)
+            "$HOME/.local/bin/perfil" normal
+            ;;
+
+        *"Programação"*)
+            "$HOME/.local/bin/perfil" programacao
+            ;;
+
+        *"Gaming"*)
+            "$HOME/.local/bin/perfil" gaming
+            ;;
+
+        *"Faculdade"*)
+            "$HOME/.local/bin/perfil" faculdade
+            ;;
+
+        *"Focus"*)
+            "$HOME/.local/bin/perfil" focus
+            ;;
+
+    esac
+}
+
+# ============================================================
+# ENERGIA LOCAL
+# ============================================================
+
+confirm_action() {
+    local action="$1"
+
+    printf '%s\n' \
+        "Não" \
+        "Sim" |
+    menu "Confirmar $action?"
+}
+
+
+power_menu() {
+    local choice
+    local confirm
+
+
+    choice="$(
+        printf '%s\n' \
+            "󰌾  Bloquear" \
+            "󰜉  Reiniciar" \
+            "󰐥  Desligar" |
+        menu "Energia"
+    )" || return
+
+
+    case "$choice" in
+
+        *"Bloquear"*)
+
+            loginctl lock-session
+            ;;
+
+
+        *"Reiniciar"*)
+
+            confirm="$(
+                confirm_action "reinício"
+            )" || return
+
+
+            if [ "$confirm" = "Sim" ]; then
+                systemctl reboot
+            fi
+            ;;
+
+
+        *"Desligar"*)
+
+            confirm="$(
+                confirm_action "desligamento"
+            )" || return
+
+
+            if [ "$confirm" = "Sim" ]; then
+                systemctl poweroff
+            fi
+            ;;
+
+    esac
+}
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+main() {
+    local choice
+
+
+    #
+    #
+
+    choice="$(
+        printf '%s\n' \
+            "󰤨  Wi-Fi          $(wifi_status)" \
+            "󰂯  Bluetooth      $(bluetooth_status)" \
+            "󰕾  Áudio          $(volume_status)" \
+            "󰃠  Brilho         $(brightness_status)" \
+            "󰁹  Bateria        $(battery_status)" \
+            "󰔏  Temperatura    $(temperature_status)" \
+            "󰘚  Perfil         $(current_profile)" \
+            "󰐥  Energia" |
+        menu "Control Center"
+    )" || exit 0
+
+
+    [ -z "$choice" ] && exit 0
+
+
+    case "$choice" in
+
+        *"Wi-Fi"*)
+
+            if [ "$(nmcli radio wifi)" = "enabled" ]; then
+
+                wifi_menu
+
+            else
+
+                nmcli radio wifi on
+                sleep 1
+                wifi_menu
+
+            fi
+            ;;
+
+
+        *"Bluetooth"*)
+
+            if [ "$(bluetooth_status)" = "Ligado" ]; then
+
+                bluetooth_menu
+
+            else
+
+                bluetoothctl power on \
+                    >/dev/null 2>&1
+
+                sleep 1
+
+                bluetooth_menu
+
+            fi
+            ;;
+
+
+        *"Áudio"*)
+
+            audio_menu
+            ;;
+
+
+        *"Brilho"*)
+
+            brightness_menu
+            ;;
+
+
+        *"Perfil"*)
+
+            profile_menu
+            ;;
+
+
+        *"Energia"*)
+
+            power_menu
+            ;;
+
+    esac
+}
+
+
+main

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Perfil Programação
+Comment=Ambiente para desenvolvimento
+Exec=/home/kauan/.local/bin/perfil programacao
+Icon=code
+Terminal=false
+Type=Application
+Categories=System;

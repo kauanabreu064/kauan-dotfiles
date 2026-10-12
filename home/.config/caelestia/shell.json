@@ -1,0 +1,11 @@
+{
+    "appearance": {
+        "transparency": {
+            "enabled": false
+        }
+    },
+    "services": {
+        "sensorUnits": "Celsius",
+        "weatherUnits": "Celsius"
+    }
+}

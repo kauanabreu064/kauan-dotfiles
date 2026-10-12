@@ -1,0 +1,493 @@
+/* =========================================================
+   KAUAN CLEAN
+   Spotify + Caelestia
+   ========================================================= */
+
+:root {
+    --kauan-bg: #0c0c0c;
+    --kauan-bg-dark: #090909;
+
+    --kauan-card: #171717;
+    --kauan-card-hover: #252525;
+
+    --kauan-border: #29262a;
+
+    --kauan-text: #e7e5e7;
+    --kauan-muted: #a8a5aa;
+
+    --kauan-accent: #d8a7c7;
+    --kauan-accent-hover: #e8b8d6;
+
+    /*
+       IMPORTANTE:
+       remove o espaço reservado para a sidebar direita
+    */
+    --right-sidebar-width: 0px !important;
+}
+
+
+/* =========================================================
+   FUNDO GERAL
+   ========================================================= */
+
+html,
+body {
+    background: var(--kauan-bg) !important;
+}
+
+.Root,
+.Root__top-container,
+.Root__main-view,
+.main-view-container,
+.main-view-container__scroll-node {
+    background: var(--kauan-bg) !important;
+}
+
+
+/* remove alguns gradientes de fundo */
+
+.main-view-container__scroll-node::before {
+    opacity: 0 !important;
+}
+
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.Root__globalNav {
+    background: var(--kauan-bg-dark) !important;
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   SIDEBAR ESQUERDA
+   ========================================================= */
+
+.Root__nav-bar {
+    background: var(--kauan-bg-dark) !important;
+
+    border-right:
+        1px solid var(--kauan-border) !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   ÁREA CENTRAL
+   ========================================================= */
+
+.Root__main-view {
+    background: var(--kauan-bg) !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   REMOVE SIDEBAR DIREITA
+   ========================================================= */
+
+/*
+   Não basta esconder o conteúdo.
+   Precisamos remover a largura dela também.
+*/
+
+.Root__right-sidebar {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+    opacity: 0 !important;
+
+    border: none !important;
+
+    pointer-events: none !important;
+}
+
+
+/* conteúdo interno */
+
+.Root__right-sidebar > * {
+    display: none !important;
+}
+
+
+/* barra usada para redimensionar */
+
+.Root__right-sidebar .LayoutResizer__resize-bar,
+.Root__right-sidebar [class*="resize-bar"] {
+    display: none !important;
+}
+
+
+/* algumas versões usam esses elementos */
+
+[data-testid="right-sidebar"],
+aside[aria-label="Now playing view"],
+aside[aria-label="Now Playing View"] {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+
+    overflow: hidden !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    opacity: 0 !important;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+[data-testid="card-container"] {
+    background: transparent !important;
+
+    border-radius: 10px !important;
+
+    box-shadow: none !important;
+
+    transition:
+        background 120ms ease,
+        transform 120ms ease !important;
+}
+
+
+[data-testid="card-container"]:hover {
+    background: var(--kauan-card-hover) !important;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   PLAY BUTTON DOS CARDS
+   ========================================================= */
+
+[data-testid="play-button"] {
+    background: var(--kauan-accent) !important;
+
+    color: #111111 !important;
+
+    box-shadow: none !important;
+}
+
+
+[data-testid="play-button"]:hover {
+    background: var(--kauan-accent-hover) !important;
+
+    transform: scale(1.04);
+}
+
+
+/* =========================================================
+   BOTÕES
+   ========================================================= */
+
+button {
+    box-shadow: none !important;
+}
+
+
+button:not([data-testid="play-button"]):hover {
+    background-color: var(--kauan-card-hover) !important;
+}
+
+
+/* =========================================================
+   CHIPS
+   All / Music / Podcasts etc
+   ========================================================= */
+
+[role="presentation"] button {
+    border-radius: 10px !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+input {
+    background: var(--kauan-card) !important;
+
+    color: var(--kauan-text) !important;
+
+    border: none !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   PLAYER INFERIOR
+   ========================================================= */
+
+.Root__now-playing-bar {
+    background: var(--kauan-bg-dark) !important;
+
+    border-top:
+        1px solid var(--kauan-border) !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   BARRA DE PROGRESSO
+   ========================================================= */
+
+.progress-bar {
+    --fg-color:
+        var(--kauan-accent) !important;
+}
+
+
+/* tenta cobrir versões novas */
+
+[class*="progressBar"] {
+    --fg-color:
+        var(--kauan-accent) !important;
+}
+
+
+/* =========================================================
+   TEXTO
+   ========================================================= */
+
+body {
+    color: var(--kauan-text) !important;
+}
+
+
+span,
+p {
+    text-shadow: none !important;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+    width: 7px !important;
+
+    height: 7px !important;
+}
+
+
+::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+
+::-webkit-scrollbar-thumb {
+    background: #343034 !important;
+
+    border-radius: 10px !important;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4a444b !important;
+}
+
+
+/* =========================================================
+   BORDAS / SOMBRAS
+   ========================================================= */
+
+section,
+main {
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   HOVER DAS LINHAS
+   ========================================================= */
+
+[role="row"]:hover {
+    background:
+        var(--kauan-card-hover) !important;
+}
+
+
+/* =========================================================
+   SELEÇÃO
+   ========================================================= */
+
+::selection {
+    background: var(--kauan-accent) !important;
+
+    color: #111111 !important;
+}
+
+
+/* =========================================================
+   ANIMAÇÕES
+   ========================================================= */
+
+button,
+a,
+[data-testid="card-container"] {
+    transition:
+        background-color 120ms ease,
+        opacity 120ms ease,
+        transform 120ms ease !important;
+}
+
+/* =====================================================
+   KAUAN - PLAYER CENTRAL
+   ===================================================== */
+
+.Root__main-view {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+
+/* nosso player cobre a Home normal */
+
+#kauan-nowplaying {
+    position: absolute !important;
+
+    inset: 0 !important;
+
+    z-index: 1000 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    justify-content: center !important;
+    align-items: center !important;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #181418 0%,
+            #0c0c0c 55%,
+            #090909 100%
+        ) !important;
+
+    padding: 40px !important;
+}
+
+
+/* =============================
+   CAPA
+   ============================= */
+
+.kauan-cover-wrapper {
+    width: min(52vh, 520px) !important;
+    aspect-ratio: 1 / 1 !important;
+
+    border-radius: 22px !important;
+
+    overflow: hidden !important;
+
+    background: #171717 !important;
+
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(216, 167, 199, 0.08) !important;
+}
+
+
+#kauan-cover {
+    width: 100% !important;
+    height: 100% !important;
+
+    display: block !important;
+
+    object-fit: cover !important;
+}
+
+
+/* =============================
+   MÚSICA
+   ============================= */
+
+#kauan-song {
+    margin-top: 28px !important;
+
+    max-width: 650px !important;
+
+    color: #f1eef1 !important;
+
+    font-size: 28px !important;
+    font-weight: 700 !important;
+
+    text-align: center !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+
+/* =============================
+   ARTISTA
+   ============================= */
+
+#kauan-artist {
+    margin-top: 7px !important;
+
+    color: #a8a5aa !important;
+
+    font-size: 16px !important;
+    font-weight: 500 !important;
+
+    text-align: center !important;
+}
+
+
+/* =====================================================
+   SIDEBAR DIREITA
+   ===================================================== */
+
+.Root__right-sidebar {
+    display: none !important;
+}
+
+
+/* =====================================================
+   SIDEBAR ESQUERDA
+   ===================================================== */
+
+.Root__nav-bar {
+    background: #090909 !important;
+}
+
+
+/* deixa a biblioteca mais limpa */
+
+.Root__nav-bar {
+    border-right:
+        1px solid #29262a !important;
+}
+
+
+/* =====================================================
+   PLAYER DE BAIXO
+   ===================================================== */
+
+.Root__now-playing-bar {
+    background: #090909 !important;
+
+    border-top:
+        1px solid #29262a !important;
+}

@@ -1,0 +1,114 @@
+* {
+    font: "JetBrainsMono Nerd Font 12";
+
+    background: #0c0c0c;
+    background-alt: #191919;
+
+    foreground: #e7e5e7;
+    muted: #777377;
+
+    accent: #d8a7c7;
+
+    border-color: #4f3759;
+}
+
+
+window {
+    width: 500px;
+
+    background-color: @background;
+
+    border: 1px;
+    border-color: @border-color;
+
+    border-radius: 16px;
+
+    padding: 12px;
+}
+
+
+mainbox {
+    background-color: transparent;
+
+    spacing: 10px;
+
+    children: [
+        inputbar,
+        listview
+    ];
+}
+
+
+inputbar {
+    background-color: @background-alt;
+
+    border: 0px;
+    border-radius: 12px;
+
+    padding: 12px;
+
+    spacing: 5px;
+
+    children: [
+        prompt,
+        entry
+    ];
+}
+
+
+prompt {
+    background-color: transparent;
+
+    text-color: @accent;
+}
+
+
+entry {
+    background-color: transparent;
+
+    text-color: @foreground;
+
+    placeholder: "Pesquisar...";
+    placeholder-color: @muted;
+}
+
+
+listview {
+    background-color: transparent;
+
+    lines: 12;
+
+    spacing: 4px;
+
+    scrollbar: false;
+
+    fixed-height: false;
+}
+
+
+element {
+    background-color: transparent;
+
+    border-radius: 11px;
+
+    padding: 11px;
+}
+
+
+element-text {
+    background-color: transparent;
+
+    text-color: @foreground;
+}
+
+
+element selected {
+    background-color: #252525;
+}
+
+
+element selected element-text {
+    background-color: transparent;
+
+    text-color: #ffffff;
+}

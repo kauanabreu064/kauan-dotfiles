@@ -1,0 +1,17 @@
+caelestia-cli
+caelestia-firefox-theme
+caelestia-shell
+darkly-bin
+equibop-bin
+papirus-folders
+paru
+paru-debug
+pwvucontrol
+qtengine
+sddm-silent-theme
+spicetify-cli
+spicetify-marketplace-bin
+spotify
+visual-studio-code-bin
+vscodium-bin
+vscodium-bin-marketplace

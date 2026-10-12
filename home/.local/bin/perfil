@@ -1,0 +1,242 @@
+#!/usr/bin/env bash
+
+set -u
+
+PROFILE="${1:-normal}"
+CACHE="$HOME/.cache/kauan-profile"
+
+
+# ============================================================
+# FUNÇÕES
+# ============================================================
+
+power() {
+    if command -v powerprofilesctl >/dev/null 2>&1; then
+        powerprofilesctl set "$1" 2>/dev/null || true
+    fi
+}
+
+
+dispatch() {
+    hyprctl dispatch "$1" >/dev/null 2>&1 || true
+}
+
+
+workspace() {
+    dispatch "hl.dsp.focus({ workspace = \"$1\" })"
+}
+
+
+exec_app() {
+    dispatch "hl.dsp.exec_cmd(\"$1\")"
+}
+
+
+visual_normal() {
+    hyprctl keyword animations:enabled true >/dev/null 2>&1 || true
+    hyprctl keyword decoration:blur:enabled true >/dev/null 2>&1 || true
+}
+
+
+visual_gaming() {
+    hyprctl keyword animations:enabled false >/dev/null 2>&1 || true
+    hyprctl keyword decoration:blur:enabled false >/dev/null 2>&1 || true
+}
+
+
+dnd_on() {
+    caelestia shell notifs enableDnd >/dev/null 2>&1 || true
+}
+
+
+dnd_off() {
+    caelestia shell notifs disableDnd >/dev/null 2>&1 || true
+}
+
+
+pause_media() {
+    caelestia shell mpris pause >/dev/null 2>&1 || true
+}
+
+
+notify() {
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send \
+            -a "Perfis" \
+            "Perfil: $1" \
+            "$2"
+    fi
+}
+
+
+save_profile() {
+    mkdir -p "$(dirname "$CACHE")"
+    echo "$1" > "$CACHE"
+}
+
+
+# ============================================================
+# PERFIS
+# ============================================================
+
+case "$PROFILE" in
+
+    normal)
+        power balanced
+
+        visual_normal
+        dnd_off
+
+        save_profile normal
+
+        notify \
+            "Normal" \
+            "Balanced • efeitos ativados • notificações normais"
+        ;;
+
+
+    programacao)
+        power balanced
+
+        visual_normal
+        dnd_off
+
+        # --------------------------------
+        # VS Code -> workspace 2
+        # --------------------------------
+
+        workspace 2
+        sleep 0.2
+
+        exec_app "code --new-window"
+
+        sleep 1
+
+
+        # --------------------------------
+        # Kitty -> workspace 3
+        # --------------------------------
+
+        workspace 3
+        sleep 0.2
+
+        exec_app "kitty"
+
+        sleep 0.5
+
+
+        # --------------------------------
+        # Volta para o VS Code
+        # --------------------------------
+
+        workspace 2
+
+        save_profile programacao
+
+        notify \
+            "Programação" \
+            "VS Code • Kitty • Balanced"
+        ;;
+
+
+    gaming)
+        power performance
+
+        visual_gaming
+        dnd_on
+
+        # --------------------------------
+        # Steam -> workspace 4
+        # --------------------------------
+
+        workspace 4
+        sleep 0.4
+
+        if ! pgrep -x steam >/dev/null 2>&1; then
+            exec_app "steam"
+        fi
+
+        save_profile gaming
+
+        notify \
+            "Gaming" \
+            "Performance • Steam • DND • efeitos reduzidos"
+        ;;
+
+
+    faculdade)
+        power power-saver
+
+        visual_normal
+        dnd_off
+
+        # --------------------------------
+        # Firefox + Teams -> workspace 2
+        # --------------------------------
+
+        workspace 2
+        sleep 0.3
+
+        exec_app "firefox --new-window https://teams.microsoft.com"
+
+        save_profile faculdade
+
+        notify \
+            "Faculdade" \
+            "Economia de energia • Firefox • Teams"
+        ;;
+
+
+    focus)
+        power balanced
+
+        visual_normal
+        dnd_on
+        pause_media
+
+        # --------------------------------
+        # Workspace limpo para foco
+        # --------------------------------
+
+        workspace 5
+
+        save_profile focus
+
+        notify \
+            "Focus" \
+            "DND ativado • música pausada • workspace 5"
+        ;;
+
+
+    atual|status)
+        if [ -f "$CACHE" ]; then
+            echo "Perfil atual: $(cat "$CACHE")"
+        else
+            echo "Nenhum perfil selecionado."
+        fi
+        exit 0
+        ;;
+
+
+    *)
+        echo
+        echo "Perfis disponíveis:"
+        echo
+        echo "  normal"
+        echo "  programacao"
+        echo "  gaming"
+        echo "  faculdade"
+        echo "  focus"
+        echo
+        echo "Uso:"
+        echo "  perfil normal"
+        echo
+        echo "  perfil programacao"
+        echo "  perfil gaming"
+        echo "  perfil faculdade"
+        echo "  perfil focus"
+        echo "  perfil atual"
+        echo
+        exit 1
+        ;;
+esac

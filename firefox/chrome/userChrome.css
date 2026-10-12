@@ -1,0 +1,285 @@
+@import url("theme/tab-close-favicon.css");
+@import url("theme/accent-colour.css");
+@import url("theme/one-line.css");
+@import url("theme/extension-menu-in-grid.css");
+
+/* =====================================
+   URL BAR POPUP AO CLICAR
+   ===================================== */
+
+/* animação normal */
+#urlbar {
+    transition:
+        width 160ms ease,
+        min-width 160ms ease,
+        max-width 160ms ease,
+        transform 160ms ease,
+        top 160ms ease !important;
+}
+
+
+/* quando clicar na barra */
+#urlbar[breakout][breakout-extend],
+#urlbar[focused="true"] {
+    position: fixed !important;
+
+    top: 22px !important;
+    left: 50% !important;
+
+    width: min(900px, 75vw) !important;
+    min-width: min(900px, 75vw) !important;
+    max-width: min(900px, 75vw) !important;
+
+    transform: translateX(-50%) !important;
+
+    z-index: 999999 !important;
+}
+
+
+/* caixa grande */
+#urlbar[breakout][breakout-extend] > #urlbar-background,
+#urlbar[focused="true"] > #urlbar-background {
+    background: #313244 !important;
+
+    border: 1px solid #cba6f7 !important;
+    border-radius: 16px !important;
+
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+
+/* aumenta a altura para digitar */
+#urlbar[breakout][breakout-extend] .urlbar-input-container,
+#urlbar[focused="true"] .urlbar-input-container {
+    min-height: 52px !important;
+    padding-inline: 18px !important;
+
+    font-size: 16px !important;
+}
+
+
+/* resultados que aparecem embaixo */
+#urlbar[breakout][breakout-extend] .urlbarView,
+#urlbar[focused="true"] .urlbarView {
+    background: #1e1e2e !important;
+
+    border-radius: 0 0 16px 16px !important;
+
+    margin-top: 6px !important;
+
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.40) !important;
+}
+
+
+/* deixa cada resultado mais espaçado */
+.urlbarView-row {
+    min-height: 42px !important;
+    border-radius: 10px !important;
+    margin: 3px 8px !important;
+}
+
+
+/* hover nos resultados */
+.urlbarView-row:hover,
+.urlbarView-row[selected] {
+    background: #313244 !important;
+}
+
+
+/* =========================
+   LIMPEZA DOS BOTÕES
+   ========================= */
+
+/* Sidebar */
+#sidebar-button {
+    display: none !important;
+}
+
+/* Listar todas as abas */
+#alltabs-button {
+    display: none !important;
+}
+
+/* Pocket */
+#save-to-pocket-button {
+    display: none !important;
+}
+
+/* Home */
+#home-button {
+    display: none !important;
+}
+
+/* Tradução */
+#translations-button {
+    display: none !important;
+}
+
+/* Conta / Firefox Sync */
+#fxa-toolbar-menu-button {
+    display: none !important;
+}
+
+/* Mantém Downloads visível */
+#downloads-button {
+    display: -moz-box !important;
+}
+
+/* Extensões */
+#unified-extensions-button {
+    display: none !important;
+}
+
+/* =========================================
+   CORES - COMBINANDO COM O CAELESTIA
+   ========================================= */
+
+:root {
+    /* fundos */
+    --toolbar-bgcolor: #0c0c0c !important;
+    --lwt-accent-color: #0c0c0c !important;
+
+    /* texto */
+    --toolbar-color: #e7e5e7 !important;
+    --lwt-text-color: #e7e5e7 !important;
+
+    /* barra de endereço */
+    --toolbar-field-background-color: #252525 !important;
+    --toolbar-field-color: #e7e5e7 !important;
+    --toolbar-field-border-color: transparent !important;
+
+    /* aba selecionada */
+    --tab-selected-bgcolor: #2c2c30 !important;
+}
+
+
+/* fundo geral da barra */
+
+#navigator-toolbox,
+#TabsToolbar,
+#nav-bar {
+    background: #0c0c0c !important;
+}
+
+
+/* =========================================
+   ABAS
+   ========================================= */
+
+/* abas normais */
+
+.tabbrowser-tab .tab-background {
+    background: transparent !important;
+}
+
+
+/* hover */
+
+.tabbrowser-tab:hover .tab-background {
+    background: #252525 !important;
+}
+
+
+/* aba selecionada */
+
+.tabbrowser-tab[selected] .tab-background {
+    background: #2c2c30 !important;
+
+    border: 1px solid #4f3759 !important;
+
+    box-shadow:
+        0 0 0 1px rgba(79, 55, 89, 0.15) !important;
+}
+
+
+/* texto da aba */
+
+.tabbrowser-tab {
+    color: #cfcdd0 !important;
+}
+
+.tabbrowser-tab[selected] {
+    color: #ffffff !important;
+}
+
+
+/* =========================================
+   URL BAR
+   ========================================= */
+
+#urlbar-background {
+    background: #252525 !important;
+
+    border: 1px solid #303034 !important;
+
+    box-shadow: none !important;
+}
+
+
+/* quando passa o mouse */
+
+#urlbar:hover > #urlbar-background {
+    background: #2c2c30 !important;
+}
+
+
+/* quando clica */
+
+#urlbar[focused="true"] > #urlbar-background,
+#urlbar[breakout][breakout-extend] > #urlbar-background {
+    background: #191919 !important;
+
+    border: 1px solid #4f3759 !important;
+
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(79, 55, 89, 0.20) !important;
+}
+
+
+/* =========================================
+   POPUP DA URL
+   ========================================= */
+
+#urlbar[breakout][breakout-extend] .urlbarView,
+#urlbar[focused="true"] .urlbarView {
+    background: #191919 !important;
+    color: #e7e5e7 !important;
+}
+
+
+/* resultados */
+
+.urlbarView-row:hover,
+.urlbarView-row[selected] {
+    background: #2c2c30 !important;
+}
+
+
+/* =========================================
+   BOTÕES
+   ========================================= */
+
+toolbarbutton {
+    color: #d6d4d6 !important;
+}
+
+toolbarbutton:hover {
+    background: #2c2c30 !important;
+}
+
+toolbarbutton[open="true"],
+toolbarbutton:active {
+    background: #4f3759 !important;
+}
+
+
+/* =========================================
+   SEPARADORES / BORDAS
+   ========================================= */
+
+#navigator-toolbox {
+    border-bottom: 1px solid #1a1a1a !important;
+}
